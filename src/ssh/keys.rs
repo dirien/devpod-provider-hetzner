@@ -1,6 +1,12 @@
 use std::fs;
 use std::io::ErrorKind;
+
+#[cfg(any(target_os = "linux", target_os = "macos"))]
 use std::os::unix::fs::PermissionsExt;
+
+#[cfg(target_os = "windows")]
+use std::os::windows::fs::PermissionsExt;
+
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
@@ -38,6 +44,7 @@ pub fn get_private_key_raw_base(dir: String) -> String {
         if !private_key_file.exists() {
             let (public_key, private_key) = make_ssh_key_pair();
             fs::write(private_key_file.clone(), private_key.as_str()).unwrap();
+            #[cfg(any(target_os = "linux", target_os = "macos"))]
             fs::set_permissions(private_key_file.clone(), fs::Permissions::from_mode(0o600)).unwrap();
             fs::write(public_key_file.clone(), public_key.as_str()).unwrap();
             fs::set_permissions(public_key_file.clone(), fs::Permissions::from_mode(0o644)).unwrap();
