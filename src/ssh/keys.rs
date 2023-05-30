@@ -5,7 +5,7 @@ use std::io::ErrorKind;
 use std::os::unix::fs::PermissionsExt;
 
 #[cfg(target_os = "windows")]
-use std::os::windows::fs::PermissionsExt;
+use std::fs::Permissions;
 
 use std::path::Path;
 use std::sync::{Arc, Mutex};
