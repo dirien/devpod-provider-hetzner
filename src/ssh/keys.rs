@@ -4,9 +4,6 @@ use std::io::ErrorKind;
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 use std::os::unix::fs::PermissionsExt;
 
-#[cfg(target_os = "windows")]
-use std::fs::Permissions;
-
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
@@ -35,8 +32,8 @@ pub fn get_private_key_raw_base(dir: String) -> String {
             _ => {}
         }
 
-        let permissions = fs::Permissions::from_mode(0o755);
-        fs::set_permissions(dir.clone(), permissions).unwrap();
+        #[cfg(any(target_os = "linux", target_os = "macos"))]
+        fs::set_permissions(dir.clone(), fs::Permissions::from_mode(0o755)).unwrap();
 
         let path = Path::new(dir.as_str());
         let private_key_file = path.join(DEV_POD_SSH_PRIVATE_KEY_FILE);
@@ -47,6 +44,7 @@ pub fn get_private_key_raw_base(dir: String) -> String {
             #[cfg(any(target_os = "linux", target_os = "macos"))]
             fs::set_permissions(private_key_file.clone(), fs::Permissions::from_mode(0o600)).unwrap();
             fs::write(public_key_file.clone(), public_key.as_str()).unwrap();
+            #[cfg(any(target_os = "linux", target_os = "macos"))]
             fs::set_permissions(public_key_file.clone(), fs::Permissions::from_mode(0o644)).unwrap();
         }
 
