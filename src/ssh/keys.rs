@@ -72,8 +72,10 @@ pub fn get_public_key_base(dir: String) -> String {
             _ => {}
         }
 
-        let permissions = fs::Permissions::from_mode(0o755);
-        fs::set_permissions(dir.clone(), permissions).unwrap();
+        #[cfg(any(target_os = "linux", target_os = "macos"))]
+        {
+            fs::set_permissions(dir.clone(), fs::Permissions::from_mode(0o755)).unwrap();
+        }
 
 
         let path = Path::new(dir.as_str());
@@ -82,9 +84,13 @@ pub fn get_public_key_base(dir: String) -> String {
         if !private_key_file.exists() {
             let (public_key, private_key) = make_ssh_key_pair();
             fs::write(private_key_file.clone(), private_key.as_str()).unwrap();
-            fs::set_permissions(private_key_file, fs::Permissions::from_mode(0o600)).unwrap();
             fs::write(public_key_file.clone(), public_key.as_str()).unwrap();
-            fs::set_permissions(public_key_file.clone(), fs::Permissions::from_mode(0o644)).unwrap();
+
+            #[cfg(any(target_os = "linux", target_os = "macos"))]
+            {
+                fs::set_permissions(private_key_file, fs::Permissions::from_mode(0o600)).unwrap();
+                fs::set_permissions(public_key_file.clone(), fs::Permissions::from_mode(0o644)).unwrap();
+            }
         }
 
         let content = fs::read_to_string(public_key_file).unwrap();
