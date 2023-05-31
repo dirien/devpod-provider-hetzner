@@ -14,8 +14,15 @@ impl Command {
         match hetzner {
             Ok(provider) => {
                 let command = env::var("COMMAND");
-                let private_key = ssh::keys::get_private_key_raw_base(provider.options.machine_folder.clone());
-
+                let private_key;
+                #[cfg(any(target_os = "linux", target_os = "macos"))]
+                {
+                    private_key = ssh::keys::get_private_key_raw_base(provider.options.machine_folder.clone());
+                }
+                #[cfg(target_os = "windows")]
+                {
+                    private_key = ssh::keys::get_private_key_filename(provider.options.machine_folder.clone());
+                }
                 let instance = provider.get_devpod_instance().await;
                 match instance {
                     Err(err) => return Err(err),

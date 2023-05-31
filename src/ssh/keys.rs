@@ -23,6 +23,12 @@ fn make_ssh_key_pair() -> (String, String) {
     (public_key, private_key_raw.unwrap())
 }
 
+pub fn get_private_key_filename(dir: String) -> String {
+    let path = Path::new(dir.as_str());
+    let private_key_file = path.join(DEV_POD_SSH_PRIVATE_KEY_FILE);
+    private_key_file.to_str().unwrap().to_string()
+}
+
 pub fn get_private_key_raw_base(dir: String) -> String {
     let key_lock = Arc::new(Mutex::new(()));
     {
@@ -33,7 +39,9 @@ pub fn get_private_key_raw_base(dir: String) -> String {
         }
 
         #[cfg(any(target_os = "linux", target_os = "macos"))]
-        fs::set_permissions(dir.clone(), fs::Permissions::from_mode(0o755)).unwrap();
+        {
+            fs::set_permissions(dir.clone(), fs::Permissions::from_mode(0o755)).unwrap();
+        }
 
         let path = Path::new(dir.as_str());
         let private_key_file = path.join(DEV_POD_SSH_PRIVATE_KEY_FILE);
@@ -41,11 +49,12 @@ pub fn get_private_key_raw_base(dir: String) -> String {
         if !private_key_file.exists() {
             let (public_key, private_key) = make_ssh_key_pair();
             fs::write(private_key_file.clone(), private_key.as_str()).unwrap();
-            #[cfg(any(target_os = "linux", target_os = "macos"))]
-            fs::set_permissions(private_key_file.clone(), fs::Permissions::from_mode(0o600)).unwrap();
             fs::write(public_key_file.clone(), public_key.as_str()).unwrap();
             #[cfg(any(target_os = "linux", target_os = "macos"))]
-            fs::set_permissions(public_key_file.clone(), fs::Permissions::from_mode(0o644)).unwrap();
+            {
+                fs::set_permissions(public_key_file.clone(), fs::Permissions::from_mode(0o644)).unwrap();
+                fs::set_permissions(private_key_file.clone(), fs::Permissions::from_mode(0o600)).unwrap();
+            }
         }
 
         let content = fs::read_to_string(private_key_file).unwrap();
