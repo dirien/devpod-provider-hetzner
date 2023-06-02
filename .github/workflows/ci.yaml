@@ -1,13 +1,11 @@
-name: Tests and release
+name: build and release
 
 on:
-  push:
-    branches:
-      - "**"
-    tags-ignore:
-      - "precious-*"
-  pull_request:
-  workflow_dispatch:
+  release:
+    types: [ created ]
+
+permissions:
+  contents: write
 
 jobs:
   build:
