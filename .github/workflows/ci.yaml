@@ -20,30 +20,26 @@ jobs:
           - os_name: Linux-aarch64
             os: ubuntu-20.04
             target: aarch64-unknown-linux-musl
-            bin: devpod-provider-hetzner-Linux-aarch64
-            name: devpod-provider-hetzner-Linux-aarch64.tar.gz
+            bin: devpod-provider-hetzner-linux-arm64
           - os_name: Linux-x86_64
             os: ubuntu-20.04
-            target:  x86_64-unknown-linux-gnu
-            bin: devpod-provider-hetzner-Linux-x86_64
-            name: devpod-provider-hetzner-Linux-x86_64.tar.gz
+            target: x86_64-unknown-linux-gnu
+            bin: devpod-provider-hetzner-linux-amd64
 
-          - os_name: Windows-x86_64
-            os: windows-latest
-            target: x86_64-pc-windows-msvc
-            bin: devpod-provider-hetzner-Windows-x86_64.exe
-            name: devpod-provider-hetzner-Windows-x86_64.tar.gz
+          #- os_name: Windows-x86_64
+          #  os: windows-latest
+          #  target: x86_64-pc-windows-msvc
+          #  bin: devpod-provider-hetzner-windows-amd64.exe
 
           - os_name: macOS-x86_64
             os: macOS-latest
             target: x86_64-apple-darwin
-            bin: devpod-provider-hetzner-Darwin-x86_64
+            bin: devpod-provider-hetzner-darwin-amd64
             name: devpod-provider-hetzner-Darwin-x86_64.tar.gz
           - os_name: macOS-aarch64
             os: macOS-latest
             target: aarch64-apple-darwin
-            bin: devpod-provider-hetzner-Darwin-aarch64
-            name: devpod-provider-hetzner-Darwin-aarch64.tar.gz
+            bin: devpod-provider-hetzner-darwin-arm64
         toolchain:
           - stable
     steps:
@@ -56,3 +52,19 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           args: "--locked --release"
           strip: true
+      - name: rename binary
+        run: mv target/${{ matrix.platform.target }}/release/devpod-provider-hetzner target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: binaries
+          path: target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+  release:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Move binaries to release folder
+        uses: actions/download-artifact@v3
+        with:
+          name: binaries
+          path: release
