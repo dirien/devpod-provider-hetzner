@@ -54,7 +54,7 @@ jobs:
       - name: rename binary
         run: mv target/${{ matrix.platform.target }}/release/devpod-provider-hetzner target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
       - name: Generate SHA-256
-        run: shasum -a 256 target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }} > target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
+        run: shasum -a 256 target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }} | cut -d ' ' -f 1 > target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
@@ -87,7 +87,7 @@ jobs:
       - name: Compile binaries
         run: |
           chmod +x ./hack/build.sh
-          ls -la release
+          ls -la
           ./hack/build.sh
         env:
           RELEASE_VERSION: ${{ steps.get_version.outputs.release_version }}
