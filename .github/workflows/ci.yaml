@@ -31,10 +31,10 @@ jobs:
           #  target: x86_64-pc-windows-msvc
           #  bin: devpod-provider-hetzner-windows-amd64.exe
 
-          - os_name: macOS-x86_64
-            os: macOS-latest
-            target: x86_64-apple-darwin
-            bin: devpod-provider-hetzner-darwin-amd64
+          #- os_name: macOS-x86_64
+          #  os: macOS-latest
+          #  target: x86_64-apple-darwin
+          #  bin: devpod-provider-hetzner-darwin-amd64
           #- os_name: macOS-aarch64
           #  os: macOS-latest
           #  target: aarch64-apple-darwin
@@ -87,6 +87,7 @@ jobs:
       - name: Compile binaries
         run: |
           chmod +x ./hack/build.sh
+          ls -la release
           ./hack/build.sh
         env:
           RELEASE_VERSION: ${{ steps.get_version.outputs.release_version }}

@@ -26,6 +26,7 @@ func main() {
 
 	content, err := os.ReadFile("./hack/provider/provider.yaml")
 	if err != nil {
+		fmt.Fprintln(os.Stderr, "provider.yaml not found")
 		panic(err)
 	}
 
