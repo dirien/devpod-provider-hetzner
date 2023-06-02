@@ -69,11 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: Move binaries to release folder
-        uses: actions/download-artifact@v3
-        with:
-          name: binaries
-          path: release
       - name: Set up Go 1.20
         uses: actions/setup-go@v2
         with:
@@ -84,6 +79,12 @@ jobs:
         run: |
           RELEASE_VERSION=$(echo $GITHUB_REF | sed -nE 's!refs/tags/!!p')
           echo "::set-output name=release_version::$RELEASE_VERSION"
+      - name: Move binaries to release folder
+        uses: actions/download-artifact@v3
+        with:
+          name: binaries
+          path: release
+
       - name: Compile binaries
         run: |
           chmod +x ./hack/build.sh
