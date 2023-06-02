@@ -1,0 +1,117 @@
+name: hetzner
+version: ##VERSION##
+description: |-
+  DevPod on Hetzner
+icon: https://avatars3.githubusercontent.com/hetznercloud
+optionGroups:
+  - options:
+      - LOCATION
+      - IMAGE
+      - SERVER_TYPE
+      - ARCHITECTURE
+    name: "Hetzner options"
+  - options:
+      - AGENT_PATH
+      - AGENT_DATA_PATH
+      - INACTIVITY_TIMEOUT
+      - INJECT_DOCKER_CREDENTIALS
+      - INJECT_GIT_CREDENTIALS
+    name: "Agent options"
+options:
+  HCLOUD_TOKEN:
+    description: The Hetzner Cloud API token to use.
+    required: true
+    password: true
+  LOCATION:
+    description: The Hetzner Cloud location to use.
+    required: true
+    default: nbg1
+    suggestions:
+      - fsn1
+      - nbg1
+      - hel1
+      - ash
+      - hil
+  IMAGE:
+    description: The image to use. Currently only docker-ce is supported.
+    default: docker-ce
+  SERVER_TYPE:
+    description: The machine type to use, arm based machines are only available in certain locations.
+    default: cx31
+    suggestions:
+      - cx21
+      - cx31
+      - cx41
+      - cax21
+      - cax31
+      - cax41
+  ARCHITECTURE:
+    description: The architecture to use, ARM is only available in certain locations.
+    default: x86
+    suggestions:
+      - x86
+      - arm
+  INACTIVITY_TIMEOUT:
+    description: If defined, will automatically stop the VM after the inactivity period.
+    default: 10m
+  INJECT_GIT_CREDENTIALS:
+    description: "If DevPod should inject git credentials into the remote host."
+    default: "true"
+  INJECT_DOCKER_CREDENTIALS:
+    description: "If DevPod should inject docker credentials into the remote host."
+    default: "true"
+  AGENT_PATH:
+    description: The path where to inject the DevPod agent to.
+    default: /home/devpod/.devpod/devpod
+  AGENT_DATA_PATH:
+    description: The path where to store the agent data.
+    default: /home/devpod/.devpod/agent
+agent:
+  path: ${AGENT_PATH}
+  dataPath: ${AGENT_DATA_PATH}
+  inactivityTimeout: ${INACTIVITY_TIMEOUT}
+  injectGitCredentials: ${INJECT_GIT_CREDENTIALS}
+  injectDockerCredentials: ${INJECT_DOCKER_CREDENTIALS}
+  binaries:
+    HCLOUD_PROVIDER:
+      - os: linux
+        arch: amd64
+        path: https://github.com/dirien/devpod-provider-hetzner/releases/download/##VERSION##/devpod-provider-hetzner-linux-amd64
+        checksum: ##CHECKSUM_LINUX_AMD64##
+      - os: linux
+        arch: arm64
+        path: https://github.com/dirien/devpod-provider-hetzner/releases/download/##VERSION##/devpod-provider-hetzner-linux-arm64
+        checksum: ##CHECKSUM_LINUX_ARM64##
+  exec:
+    shutdown: |-
+      ${HCLOUD_PROVIDER} stop
+binaries:
+  HCLOUD_PROVIDER:
+    - os: linux
+      arch: amd64
+      path: https://github.com/dirien/devpod-provider-hetzner/releases/download/##VERSION##/devpod-provider-hetzner-linux-amd64
+      checksum: ##CHECKSUM_LINUX_AMD64##
+    - os: linux
+      arch: arm64
+      path: https://github.com/dirien/devpod-provider-hetzner/releases/download/##VERSION##/devpod-provider-hetzner-linux-arm64
+      checksum: ##CHECKSUM_LINUX_ARM64##
+    - os: darwin
+      arch: amd64
+      path: https://github.com/dirien/devpod-provider-hetzner/releases/download/##VERSION##/devpod-provider-hetzner-darwin-amd64
+      checksum: ##CHECKSUM_DARWIN_AMD64##
+    - os: darwin
+      arch: arm64
+      path: https://github.com/dirien/devpod-provider-hetzner/releases/download/##VERSION##/devpod-provider-hetzner-darwin-arm64
+      checksum: ##CHECKSUM_DARWIN_ARM64##
+    - os: windows
+      arch: amd64
+      path: https://github.com/dirien/devpod-provider-hetzner/releases/download/##VERSION##/devpod-provider-hetzner-windows-amd64.exe
+      checksum: ##CHECKSUM_WINDOWS_AMD64##
+exec:
+  init: ${HCLOUD_PROVIDER} init
+  command: ${HCLOUD_PROVIDER} command
+  create: ${HCLOUD_PROVIDER} create
+  delete: ${HCLOUD_PROVIDER} delete
+  start: ${HCLOUD_PROVIDER} start
+  stop: ${HCLOUD_PROVIDER} stop
+  status: ${HCLOUD_PROVIDER} status

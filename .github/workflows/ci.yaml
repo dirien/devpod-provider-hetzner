@@ -17,10 +17,10 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - os_name: Linux-aarch64
-            os: ubuntu-20.04
-            target: aarch64-unknown-linux-musl
-            bin: devpod-provider-hetzner-linux-arm64
+          #- os_name: Linux-aarch64
+          #  os: ubuntu-20.04
+          #  target: aarch64-unknown-linux-musl
+          #  bin: devpod-provider-hetzner-linux-arm64
           - os_name: Linux-x86_64
             os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
@@ -35,11 +35,10 @@ jobs:
             os: macOS-latest
             target: x86_64-apple-darwin
             bin: devpod-provider-hetzner-darwin-amd64
-            name: devpod-provider-hetzner-Darwin-x86_64.tar.gz
-          - os_name: macOS-aarch64
-            os: macOS-latest
-            target: aarch64-apple-darwin
-            bin: devpod-provider-hetzner-darwin-arm64
+          #- os_name: macOS-aarch64
+          #  os: macOS-latest
+          #  target: aarch64-apple-darwin
+          #  bin: devpod-provider-hetzner-darwin-arm64
         toolchain:
           - stable
     steps:
@@ -54,11 +53,18 @@ jobs:
           strip: true
       - name: rename binary
         run: mv target/${{ matrix.platform.target }}/release/devpod-provider-hetzner target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+      - name: Generate SHA-256
+        run: shasum -a 256 target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }} > target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
           name: binaries
           path: target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}
+      - name: Upload SHA-256
+        uses: actions/upload-artifact@v3
+        with:
+          name: binaries
+          path: target/${{ matrix.platform.target }}/release/${{ matrix.platform.bin }}.sha256
   release:
     runs-on: ubuntu-latest
     needs: test
@@ -68,3 +74,23 @@ jobs:
         with:
           name: binaries
           path: release
+      - name: Set up Go 1.20
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.20.x
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+      - id: get_version
+        run: |
+          RELEASE_VERSION=$(echo $GITHUB_REF | sed -nE 's!refs/tags/!!p')
+          echo "::set-output name=release_version::$RELEASE_VERSION"
+      - name: Compile binaries
+        run: |
+          chmod +x ./hack/build.sh
+          ./hack/build.sh
+        env:
+          RELEASE_VERSION: ${{ steps.get_version.outputs.release_version }}
+      - name: Save release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*
