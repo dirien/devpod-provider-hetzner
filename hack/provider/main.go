@@ -10,11 +10,11 @@ import (
 )
 
 var checksumMap = map[string]string{
-	"./release/devpod-provider-hetzner-linux-amd64":       "##CHECKSUM_LINUX_AMD64##",
-	"./release/devpod-provider-hetzner-linux-arm64":       "##CHECKSUM_LINUX_ARM64##",
-	"./release/devpod-provider-hetzner-darwin-amd64":      "##CHECKSUM_DARWIN_AMD64##",
-	"./release/devpod-provider-hetzner-darwin-arm64":      "##CHECKSUM_DARWIN_ARM64##",
-	"./release/devpod-provider-hetzner-windows-amd64.exe": "##CHECKSUM_WINDOWS_AMD64##",
+	"./release/devpod-provider-hetzner-linux-amd64": "##CHECKSUM_LINUX_AMD64##",
+	//"./release/devpod-provider-hetzner-linux-arm64":       "##CHECKSUM_LINUX_ARM64##",
+	//"./release/devpod-provider-hetzner-darwin-amd64":      "##CHECKSUM_DARWIN_AMD64##",
+	//"./release/devpod-provider-hetzner-darwin-arm64":      "##CHECKSUM_DARWIN_ARM64##",
+	//"./release/devpod-provider-hetzner-windows-amd64.exe": "##CHECKSUM_WINDOWS_AMD64##",
 }
 
 func main() {
