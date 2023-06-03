@@ -28,7 +28,10 @@ pub fn execute_command(command: String, sess: Session) -> Result<String, Error> 
     let result = channel.read_to_string(&mut s);
     match result {
         Ok(_) => {}
-        Err(_err) => return Err(Error::new(ErrorCode::Session(0), "Error reading from ssh channel!")),
+        Err(err) => {
+            println!("Error reading from ssh channel: {}", err);
+            return Err(Error::new(ErrorCode::Session(-39), "Error reading from ssh channel"));
+        }
     }
     channel.wait_close().unwrap();
     Ok(s)
