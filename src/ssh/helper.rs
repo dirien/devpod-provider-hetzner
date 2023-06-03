@@ -6,7 +6,6 @@ pub fn new_ssh_client(user: String, ip: String, privatekey: String) -> Result<Se
     if let Ok(stream) = TcpStream::connect(format!("{}:22", ip)) {
         let mut sess = Session::new().unwrap();
         sess.set_tcp_stream(stream);
-        sess.set_timeout(5000);
         sess.handshake().unwrap();
         #[cfg(any(target_os = "linux", target_os = "macos"))]
         {
