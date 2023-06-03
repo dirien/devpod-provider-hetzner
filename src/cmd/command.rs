@@ -29,15 +29,10 @@ impl Command {
                     _ => {}
                 }
 
-                let client = ssh::helper::new_ssh_client("devpod".to_string(), instance.unwrap().public_net.ipv4.unwrap().ip.clone(),
-                                                         private_key.clone());
-                match client {
-                    Err(err) => return Err(anyhow::anyhow!("Error creating ssh client: {}", err)),
-                    _ => {}
-                }
-                let result = ssh::helper::execute_command(command.unwrap(), client.unwrap());
+                let result = ssh::helper::new_ssh_client("devpod".to_string(), instance.unwrap().public_net.ipv4.unwrap().ip.clone(),
+                                                         private_key.clone(), command.unwrap());
                 match result {
-                    Err(err) => return Err(anyhow::anyhow!("Error executing command: {}", err)),
+                    Err(err) => return Err(anyhow::anyhow!("Error creating ssh client: {}", err)),
                     _ => {
                         println!("{}", result.unwrap());
                     }
