@@ -2,7 +2,7 @@ use std::io::{Read};
 use std::net::TcpStream;
 use ssh2::{Session, Error, ErrorCode};
 
-pub fn new_ssh_client(user: String, ip: String, privatekey: String) -> Result<Session, Error> {
+pub fn new_ssh_client(user: String, ip: String, privatekey: String, command: String) -> Result<String, Error> {
     if let Ok(stream) = TcpStream::connect(format!("{}:22", ip)) {
         let mut sess = Session::new().unwrap();
         sess.set_tcp_stream(stream);
@@ -15,7 +15,12 @@ pub fn new_ssh_client(user: String, ip: String, privatekey: String) -> Result<Se
         {
             sess.userauth_pubkey_file(&user, None, std::path::Path::new(&privatekey), None).unwrap();
         }
-        Ok(sess)
+        let mut channel = sess.channel_session().unwrap();
+        channel.exec(command.as_str()).unwrap();
+        let mut s = String::new();
+        channel.read_to_string(&mut s).unwrap();
+        channel.wait_close().unwrap();
+        Ok(s)
     } else {
         return Err(Error::new(ErrorCode::Session(0), "Error connecting to ssh server"));
     }
@@ -24,9 +29,8 @@ pub fn new_ssh_client(user: String, ip: String, privatekey: String) -> Result<Se
 pub fn execute_command(command: String, sess: Session) -> Result<String, Error> {
     let mut channel = sess.channel_session().unwrap();
     channel.exec(command.as_str()).unwrap();
-    let mut s = Vec::new();
-    channel.read_to_end(&mut s).unwrap();
-    //println!("{}", String::from_utf8_lossy(&s));
-    //channel.wait_close().unwrap();
-    Ok(String::from_utf8_lossy(&s).to_string())
+    let mut s = String::new();
+    channel.read_to_string(&mut s).unwrap();
+    channel.wait_close().unwrap();
+    Ok(s)
 }
