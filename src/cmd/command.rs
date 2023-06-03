@@ -38,7 +38,9 @@ impl Command {
                 let result = ssh::helper::execute_command(command.unwrap(), client.unwrap());
                 match result {
                     Err(err) => return Err(anyhow::anyhow!("Error executing command: {}", err)),
-                    _ => {}
+                    _ => {
+                        println!("{}", result.unwrap());
+                    }
                 }
             }
             Err(err) => return Err(err),

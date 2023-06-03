@@ -24,8 +24,9 @@ pub fn new_ssh_client(user: String, ip: String, privatekey: String) -> Result<Se
 pub fn execute_command(command: String, sess: Session) -> Result<String, Error> {
     let mut channel = sess.channel_session().unwrap();
     channel.exec(command.as_str()).unwrap();
-    let mut s = String::new();
-    channel.read_to_string(&mut s).unwrap();
-    channel.wait_close().unwrap();
-    Ok(s)
+    let mut s = Vec::new();
+    channel.read_to_end(&mut s).unwrap();
+    //println!("{}", String::from_utf8_lossy(&s));
+    //channel.wait_close().unwrap();
+    Ok(String::from_utf8_lossy(&s).to_string())
 }
