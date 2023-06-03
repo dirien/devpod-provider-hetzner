@@ -17,9 +17,11 @@ pub fn new_ssh_client(user: String, ip: String, privatekey: String, command: Str
         }
         let mut channel = sess.channel_session().unwrap();
         channel.exec(command.as_str()).unwrap();
-        let mut s = Vec::new();
-        channel.read_to_end(&mut s).unwrap();
-        println!("{}", String::from_utf8_lossy(&s));
+        println!("{}", command.as_str());
+        let mut buffer = [0; 1024];
+        while channel.read(&mut buffer).unwrap() > 0 {
+            print!("{}", String::from_utf8_lossy(&buffer));
+        }
         channel.wait_close().unwrap();
         Ok("".to_string())
     } else {
