@@ -1,24 +1,10 @@
 use std::io;
 use std::io::{Read, Write};
 use std::net::TcpStream;
-use ssh2::{ErrorCode};
-use openssh::*;
+use ssh2::{Error, ErrorCode, Session};
 
 
 pub async fn new_ssh_client(user: String, ip: String, privatekey: String, command: String) -> Result<String, Error> {
-    let session = SessionBuilder::default()
-        .user(user)
-        .keyfile(privatekey)
-        .port(22)
-        .connect(ip).await.unwrap();
-
-    let ls = session.raw_command(command.as_str()).output().await.unwrap();
-    print!("{}", String::from_utf8(ls.stdout).unwrap());
-
-
-    session.close().await.unwrap();
-    Ok("".to_string())
-    /*
     if let Ok(stream) = TcpStream::connect(format!("{}:22", ip)) {
         let mut sess = Session::new().unwrap();
         sess.set_tcp_stream(stream);
@@ -36,24 +22,15 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
         let mut channel = sess.channel_session().unwrap();
         //channel.exec(command.as_str()).unwrap();
         let mut buffer = [0; 20 * 1024];
-        let mut mode = ssh2::PtyModes::new();
-        mode.
-        channel.request_pty("xterm", None, None).unwrap();
-        channel.shell().unwrap();
-        //channel.exec(command.as_str()).unwrap();
-        channel.write(command.as_ref()).unwrap();
-        channel.write(b"\n").unwrap();
+        channel.exec(command.as_str()).unwrap();
         while channel.read(&mut buffer[..]).unwrap() > 0 {
             io::stdout().write_all(&buffer[..]).unwrap();
         }
-        channel.write(b"exit\n").unwrap();
         channel.wait_close().unwrap();
         Ok("".to_string())
     } else {
         return Err(Error::new(ErrorCode::Session(0), "Error connecting to ssh server"));
     }
-
-     */
 }
 
 pub fn execute_command(command: String, sess: Session) -> Result<String, Error> {
