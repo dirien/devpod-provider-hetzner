@@ -17,7 +17,7 @@ impl Command {
                 let private_key;
                 #[cfg(any(target_os = "linux", target_os = "macos"))]
                 {
-                    private_key = ssh::keys::get_private_key_raw_base(provider.options.machine_folder.clone());
+                    private_key = ssh::keys::get_private_key_filename(provider.options.machine_folder.clone());
                 }
                 #[cfg(target_os = "windows")]
                 {
@@ -30,7 +30,7 @@ impl Command {
                 }
 
                 let result = ssh::helper::new_ssh_client("devpod".to_string(), instance.unwrap().public_net.ipv4.unwrap().ip.clone(),
-                                                         private_key.clone(), command.unwrap());
+                                                         private_key.clone(), command.unwrap()).await;
                 match result {
                     Err(err) => return Err(anyhow::anyhow!("Error creating ssh client: {}", err)),
                     _ => {
