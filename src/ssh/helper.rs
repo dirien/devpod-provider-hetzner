@@ -1,7 +1,8 @@
-use std::io;
+use std::{io, thread};
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use ssh2::{Error, ErrorCode, Session};
+use std::sync::{Arc, mpsc};
 
 
 pub async fn new_ssh_client(user: String, ip: String, privatekey: String, command: String) -> Result<String, Error> {
@@ -18,15 +19,28 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
         {
             sess.userauth_pubkey_file(&user, None, std::path::Path::new(&privatekey), None).unwrap();
         }
-
         let mut channel = sess.channel_session().unwrap();
-        //channel.exec(command.as_str()).unwrap();
-        let mut buffer = [0; 20 * 1024];
         channel.exec(command.as_str()).unwrap();
-        while channel.read(&mut buffer[..]).unwrap() > 0 {
-            io::stdout().write_all(&buffer[..]).unwrap();
+
+        let mut buffer = [0; 20 * 1024];
+        let mut stdin = io::stdin();
+        let mut stdout = io::stdout();
+
+        loop {
+            let size = match channel.read(&mut buffer) {
+                Ok(size) => size,
+                Err(_) => break,
+            };
+
+            if size > 0 {
+                stdout.write_all(&buffer[..size]).unwrap();
+                stdin.read_exact(&mut buffer[..size]).unwrap();
+                channel.write_all(&buffer[..size]).unwrap();
+            }
         }
+
         channel.wait_close().unwrap();
+
         Ok("".to_string())
     } else {
         return Err(Error::new(ErrorCode::Session(0), "Error connecting to ssh server"));
