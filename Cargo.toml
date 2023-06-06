@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.71"
 clap = { version = "4.3.0", features = ["derive"] }
+crossbeam = { version = "0.8.2", features = ["crossbeam-channel"] }
 hcloud = "0.14.0"
 openssh-keys = "0.6.0"
 openssl = { version = "0.10.52", features = ["vendored"] }

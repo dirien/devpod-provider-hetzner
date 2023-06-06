@@ -1,8 +1,7 @@
-use std::{io, thread};
+use std::{io};
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use ssh2::{Error, ErrorCode, Session};
-use std::sync::{Arc, mpsc};
 
 
 pub async fn new_ssh_client(user: String, ip: String, privatekey: String, command: String) -> Result<String, Error> {
@@ -22,7 +21,7 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
         let mut channel = sess.channel_session().unwrap();
         channel.exec(command.as_str()).unwrap();
 
-        let mut buffer = [0; 20 * 1024];
+        let mut buffer = [0; 100 * 1024];
         let mut stdin = io::stdin();
         let mut stdout = io::stdout();
 
@@ -31,11 +30,21 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
                 Ok(size) => size,
                 Err(_) => break,
             };
-
             if size > 0 {
-                stdout.write_all(&buffer[..size]).unwrap();
-                stdin.read_exact(&mut buffer[..size]).unwrap();
-                channel.write_all(&buffer[..size]).unwrap();
+                let data = std::str::from_utf8(&buffer[..size]).unwrap();
+                if data.contains("ping") {
+                    stdout.write_all(&buffer[..size]).unwrap();
+                    stdin.read_exact(&mut buffer[..size]).unwrap();
+                    channel.write_all(&buffer[..size]).unwrap();
+                } else {
+                    stdout.write_all(&buffer[..size]).unwrap();
+                    let mut s = String::new();
+                    channel.stderr().read_to_string(&mut s).unwrap();
+                    print!("{}", s);
+                    channel.write_all(&buffer[..size]).unwrap();
+                }
+            } else {
+                break;
             }
         }
 
