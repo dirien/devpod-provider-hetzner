@@ -40,7 +40,10 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
                     stdout.write_all(&buffer[..size]).unwrap();
                     let mut s = String::new();
                     channel.stderr().read_to_string(&mut s).unwrap();
-                    io::stdout().write_all(s.as_bytes()).unwrap();
+                    //print!("{}", s);
+                    //io::stdout().write_all(s.as_bytes()).unwrap();
+                    print!("{}", s);
+                    //io::stdout().write_all(&buffer[..size]).unwrap();
                 }
             } else {
                 channel.send_eof().unwrap();
