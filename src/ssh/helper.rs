@@ -40,16 +40,14 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
                     stdout.write_all(&buffer[..size]).unwrap();
                     let mut s = String::new();
                     channel.stderr().read_to_string(&mut s).unwrap();
-                    print!("{}", s);
-                    channel.write_all(&buffer[..size]).unwrap();
+                    io::stdout().write_all(s.as_bytes()).unwrap();
                 }
             } else {
+                channel.send_eof().unwrap();
+                channel.wait_close().unwrap();
                 break;
             }
         }
-
-        channel.wait_close().unwrap();
-
         Ok("".to_string())
     } else {
         return Err(Error::new(ErrorCode::Session(0), "Error connecting to ssh server"));
