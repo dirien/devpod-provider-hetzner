@@ -42,7 +42,7 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
                     channel.stderr().read_to_string(&mut s).unwrap();
                     //print!("{}", s);
                     //io::stdout().write_all(s.as_bytes()).unwrap();
-                    print!("{}", s);
+                    eprint!("{}", s);
                     //io::stdout().write_all(&buffer[..size]).unwrap();
                 }
             } else {
