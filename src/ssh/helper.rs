@@ -27,16 +27,12 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
 
         loop {
 
-            let size = match channel.stderr().read(&mut buffer) {
-                Ok(size) => size,
+            let size2 = match channel.stderr().read(&mut buffer) {
+                Ok(size2) => size2,
                 Err(_) => break,
             };
-            if size > 0 {
-                eprint!("{}", std::str::from_utf8(&buffer[..size]).unwrap());
-            } else {
-                channel.send_eof().unwrap();
-                channel.wait_close().unwrap();
-                break;
+            if size2 > 0 {
+                eprint!("{}", std::str::from_utf8(&buffer[..size2]).unwrap());
             }
 
 
@@ -58,8 +54,6 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
                 channel.wait_close().unwrap();
                 break;
             }
-
-
         }
         Ok("".to_string())
     } else {
