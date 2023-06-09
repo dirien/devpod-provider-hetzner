@@ -38,12 +38,13 @@ pub async fn new_ssh_client(user: String, ip: String, privatekey: String, comman
                     channel.write_all(&buffer[..size]).unwrap();
                 } else {
                     stdout.write_all(&buffer[..size]).unwrap();
-                    let mut s = String::new();
-                    channel.stderr().read_to_string(&mut s).unwrap();
-                    //print!("{}", s);
-                    //io::stdout().write_all(s.as_bytes()).unwrap();
-                    eprint!("{}", s);
-                    //io::stdout().write_all(&buffer[..size]).unwrap();
+                    stdout.write_all(&buffer[..size]).unwrap();
+                    while let Ok(size) = channel.stderr().read(&mut buffer) {
+                        eprint!("{}", std::str::from_utf8(&buffer[..size]).unwrap());
+                        if size == 0 {
+                            break;
+                        }
+                    }
                 }
             } else {
                 channel.send_eof().unwrap();
